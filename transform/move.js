@@ -13,10 +13,14 @@ const moveParams = {
 
 const mousedown = function (e) {
     const target = e.target;
-    if (target.tagName !== 'rect' || !moveUtil.isInSvgContent(target)) return;
+    if (/* target.tagName !== 'rect' ||  */!moveUtil.isInSvgContent(target)) {
+        // setSeleted(null);
+        return;
+    }
     moveParams.active = true;
 
     const seleted = setSeleted(target);
+    showSelectedBox(seleted);
 
     Object.assign(moveParams.originCoord, coord.toContent({x: e.offsetX, y: e.offsetY}));
     moveParams.originMatrix = seleted.attr('transform') || 'matrix(1,0,0,1,0,0)';
