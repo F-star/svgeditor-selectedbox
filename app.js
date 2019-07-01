@@ -6,6 +6,7 @@ import {draw} from './canvas.js'
 import {showSelectedBox} from './util.js'
 import './transform/move.js'
 import './transform/rotate.js'
+import './transform/scale.js'
 // svg 编辑器环境变量。
 
 const editor = {
