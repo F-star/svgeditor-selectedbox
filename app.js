@@ -25,6 +25,7 @@ const rect = draw.rect(220, 150)
                  .move(130, 100)
                  .transform({rotation: 40});
 
+const img = draw.image('/static/siga.png')
 
 // 显示 选中框。
 // showSelectedBox(rect);

@@ -5,7 +5,7 @@ import { getSeleted } from "../global.js";
 
 
 const params = {
-    // centerId
+    // centerIndex
     // center_top,
     // center_in,
     // w,
@@ -23,6 +23,7 @@ const mousedown = function (e) {
     console.log(index)
     // 计算缩放中心点。
     const centerIndex = (index + 4 ) % 8;
+    params.centerIndex = centerIndex;
     const center_top = util.getScaleGripCoord(centerIndex);    // _in 代表 svg 主体， _top 代表 root。
     params.center_top = center_top;
     params.center_in = util.getCtr(getSeleted(), centerIndex);
@@ -93,9 +94,76 @@ const mouseup = function (e) {
     const w = p_.x - params.center_in.x,
           h = p_.y - params.center_in.y;
 
-    selected.width( selected.width() * w / params.w)
-    selected.height( selected.height() * h / params.h)
+    const scaleX = w / params.w,
+          scaleY = h / params.h;
+    // 修正 x y 和 width height
+    // if 
 
+    let newWidth = selected.width() * scaleX;
+    let newHeight = selected.height() * scaleY;
+    console.log(params.centerIndex)
+
+    let targetX = selected.x(),
+        targetY = selected.y();
+    if (params.centerIndex == 0) {
+        
+    }
+
+
+    if (params.centerIndex == 2) {
+        targetX -= selected.width() * ( scaleX - 1 ) 
+        // targetY = selected.cy() + selected.height() * ( scaleY - 1 ) 
+    }
+
+    // 宽高如果为负数，就翻转。。。
+    if (newWidth < 0 && newHeight < 0) {
+        // 旋转。。。
+        selected.transform({
+            rotation: 180,
+            cx: params.center_in.x,
+            cy: params.center_in.y,
+        }, true)
+        newWidth = -newWidth;
+        newHeight = -newHeight;
+    } 
+
+    else if (newHeight < 0) {
+        console.log('执行')
+        selected.transform({
+            rotation: 180,
+            cx: params.center_in.x,
+            cy: params.center_in.y,
+        }, true)
+
+        selected.transform({
+            scaleX: -1,
+            cx: params.center_in.x,
+            cy: params.center_in.y,
+        }, true)
+        newHeight = -newHeight; 
+    }
+/*     let rotation;
+    if (newWidth < 0 && newHeight < 0) rotation = 180
+    else if (newWidth < 0) rotation = 90;
+    else if (newHeight < 0) rotation = -90;
+
+    selected.transform({
+        rotation,
+        cx: params.center_in.x,
+        cy: params.center_in.y,
+    }, true);
+
+    newWidth = Math.abs(newWidth)
+    newHeight = Math.abs(newHeight) */
+
+    console.log({
+        newWidth,
+        newHeight,
+    })
+
+    selected.width(newWidth);
+    selected.height(newHeight);
+    // selected.move(targetX, targetY);
 
 
     showSelectedBox(selected);
