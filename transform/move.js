@@ -46,6 +46,9 @@ const mousemove = function (e) {
 const mouseup = function (e) {
     // setSeleted(null);
     moveParams.active = false;
+
+    // 修改到 x y 里。
+    
 }
 
 

@@ -1,6 +1,7 @@
 import { rotateGrip, scaleGrips, svgRoot } from "../canvas.js";
 import { getSeleted } from "../global.js";
 import { showSelectedBox } from "../util.js";
+import { defaultTransform } from "./default.js";
 
 
 
@@ -32,8 +33,8 @@ const mousedown = function (e) {
     const seleted = getSeleted();
     console.log(seleted)
 
-    rotateParams.m = seleted.attr('transform');
-    rotateParams.angle = seleted.transform().rotation;
+    rotateParams.m = seleted.attr('transform') || defaultTransform;
+    rotateParams.angle = seleted.transform('rotation');
 }
 
 const mousemove = function(e) {
@@ -48,9 +49,9 @@ const mousemove = function(e) {
 
     // 修改 transform 属性。
     const seleted = getSeleted();
-    seleted.attr('transform', rotateParams.m);
-    // seleted.rotate(dRot)
-    seleted.transform({rotation: dRot}, true)
+    // seleted.attr('transform', rotateParams.m);
+    // seleted.transform({rotation: dRot}, true)
+    rotateUtil.setRotate(seleted, rotateParams.m, currAngle);
     showSelectedBox(seleted);
 }
 
@@ -59,9 +60,26 @@ const mouseup = function(e) {
     rotateParams.active = false;
 }
 
-
-
 const rotateUtil = {
+
+    // getTransformObj() {
+    //     // 自然数的正则表达式： /\d(\.\d+)?/
+    //     const pattern = /((rotate)\(()\))/;
+        
+    // },
+
+    setRotate(el, m, rot) {
+        // 修改 transform 字符串里面的 rotate 参数
+        // cx , cy 默认为 bbox 中心。
+        const {cx, cy} = el.bbox();
+        // const rot = el.transform('rotation') + dRot;
+
+        // 分解 m
+        
+
+        const r = `rotate(${rot}, ${cx}, ${cy})`
+        el.attr('transform', [r, m].join(' '))
+    },
 
     getCenterCoordInRoot() {
         const p = scaleGrips[0],
@@ -86,7 +104,7 @@ const rotateUtil = {
 
     // 计算 点1指点2形成 的向量 
     getCosBy2pt(x, y, cx, cy) {
-        // 叉乘公式
+        // 点积公式
         let a = [x - cx, y - cy];
         let b = [0, -1];
         return this.calCos(a, b);

@@ -1,6 +1,7 @@
 import { svgRoot, scaleGrips, svgContent } from "../canvas.js";
 import { coord, transformPoint, showSelectedBox } from "../util.js";
 import { getSeleted } from "../global.js";
+import { defaultTransform } from "./default.js";
 
 
 
@@ -34,7 +35,7 @@ const mousedown = function (e) {
 
     // tranform 去掉后的坐标。
 
-    params.m = getSeleted().attr('transform');
+    params.m = getSeleted().attr('transform') || defaultTransform;
     params.mObj = getSeleted().transform().matrix;
 
     const p_ = util.getOCoord(scaleGrips[index].cx(), scaleGrips[index].cy(), params.mObj);
@@ -51,7 +52,7 @@ const mousemove = function (e) {
 
     
     const selected = getSeleted();
-    selected.attr('transform', params.m);
+    // selected.attr('transform', params.m);
 
 /*     console.log({
         m: params.m,
@@ -61,13 +62,15 @@ const mousemove = function (e) {
         cy: params.center_in.y,
     }) */
 
-    console.log( util.getOCoord(x, y, params.mObj));
+
 
 
     // 计算去掉 transform 后的宽高。
     const p_ = util.getOCoord(x, y, params.mObj); 
     const w = p_.x - params.center_in.x,
           h = p_.y - params.center_in.y;
+
+ /*    selected.attr('transform', params.m);
     selected.transform({
         scaleX: w / params.w,
         scaleY: h / params.h,
@@ -75,7 +78,12 @@ const mousemove = function (e) {
         // cy: selected.bbox().y,
         cx: params.center_in.x,
         cy: params.center_in.y,
-    }, true);
+    }, true); */
+
+    
+    // selected.attr('transform', params.m + util.setScale(w / params.w, h / params.h, params.center_in.x, params.center_in.y))
+    util.setScale(selected, params.m, w / params.w, h / params.h, params.center_in.x, params.center_in.y)
+
     // util.dscale(selected, w / params.w, h / params.h, params.center_in.x, params.center_in.y)
     // util.dscale(selected, w / params.w, h / params.h, selected.bbox().x, selected.bbox().y)
     showSelectedBox(selected);
@@ -85,7 +93,7 @@ const mouseup = function (e) {
     if (!params.active) return;
     
     params.active = false;
-    const selected = getSeleted();
+/*     const selected = getSeleted();
     selected.attr('transform', params.m);
 
     const x = e.offsetX,
@@ -142,19 +150,7 @@ const mouseup = function (e) {
         }, true)
         newHeight = -newHeight; 
     }
-/*     let rotation;
-    if (newWidth < 0 && newHeight < 0) rotation = 180
-    else if (newWidth < 0) rotation = 90;
-    else if (newHeight < 0) rotation = -90;
 
-    selected.transform({
-        rotation,
-        cx: params.center_in.x,
-        cy: params.center_in.y,
-    }, true);
-
-    newWidth = Math.abs(newWidth)
-    newHeight = Math.abs(newHeight) */
 
     console.log({
         newWidth,
@@ -166,7 +162,7 @@ const mouseup = function (e) {
     // selected.move(targetX, targetY);
 
 
-    showSelectedBox(selected);
+    showSelectedBox(selected); */
     // scale 的内容要转为 width
 
 } 
@@ -183,6 +179,16 @@ const util = {
             x: scaleGrip.cx(),
             y: scaleGrip.cy(),
         }
+    },
+
+    setScale(el, m, scaleX, scaleY, cx, cy) {
+        // 添加 scale
+        const t = `translate(${cx}, ${cy})`;
+        const t2 = `translate(${-cx}, ${-cy})`
+        const s = `scale(${scaleX}, ${scaleY})`;
+        // return [s].join(' ')
+        // el.attr('transform', [t, m, s, t2].join(' '))
+        el.attr('transform', [t, m, s, t2].join(' '))
     },
 
     // 得到原始的坐标（去掉 transform 后的坐标）
