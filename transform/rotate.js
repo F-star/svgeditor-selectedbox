@@ -17,6 +17,7 @@ const rotateParams = {
 }
 
 const mousedown = function (e) {
+    return;
     // 中心旋转。
     const target = e.target;
     

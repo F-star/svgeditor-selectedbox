@@ -9,6 +9,9 @@ const moveParams = {
     },
     originMatrix: undefined,
     active: false,
+    // x
+    // y
+    // patternM
 }
 
 const mousedown = function (e) {
@@ -23,7 +26,13 @@ const mousedown = function (e) {
     showSelectedBox(seleted);
 
     Object.assign(moveParams.originCoord, coord.toContent({x: e.offsetX, y: e.offsetY}));
+
     moveParams.originMatrix = seleted.attr('transform') || 'matrix(1,0,0,1,0,0)';
+
+    moveParams.patternM = pattern.attr('transform') || '';
+    
+    moveParams.x = seleted.x();
+    moveParams.y = seleted.y();
 }
 
 const mousemove = function (e) {
@@ -37,7 +46,17 @@ const mousemove = function (e) {
 
     seleted.attr('transform', moveParams.originMatrix);   // 回归起点值。
     // seleted.transform({x: dx, y: dy}, true);
-    moveUtil.translate(seleted, dx, dy);
+    // moveUtil.translate(seleted, dx, dy);
+    seleted.move(moveParams.x + dx, moveParams.y + dy)
+
+    /** pattern 跟随 */
+    pattern.attr('transform', moveParams.patternM);
+    moveUtil.translate(pattern, dx, dy);
+    // pattern.transform({
+    //     x: dx / pattern.transform('scaleX'), 
+    //     y: dy / pattern.transform('scaleY')
+    // }, true);
+
     // seleted.translate(dx, dy)
 
     showSelectedBox(seleted);

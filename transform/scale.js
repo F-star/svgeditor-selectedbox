@@ -14,6 +14,9 @@ const params = {
     // m,
     // mObj,
     active: false,
+    // ptnCtr
+    // ptnCtr_top
+    // offsetX      // selected 相对 pattern 位置。
 };
 
 const mousedown = function (e) {
@@ -25,9 +28,23 @@ const mousedown = function (e) {
     // 计算缩放中心点。
     const centerIndex = (index + 4 ) % 8;
     params.centerIndex = centerIndex;
-    const center_top = util.getScaleGripCoord(centerIndex);    // _in 代表 svg 主体， _top 代表 root。
+    // const center_top = util.getScaleGripCoord(centerIndex);    // _in 代表 svg 主体， _top 代表 root。
+    const selected = getSeleted();
+    params.center_in = util.getCtr(selected, centerIndex);
+    const center_top = transformPoint(params.center_in.x, params.center_in.y, selected.transform())   // _in 代表 svg 主体， _top 代表 root。
+
+
+
     params.center_top = center_top;
-    params.center_in = util.getCtr(getSeleted(), centerIndex);
+    
+
+    params.ptnCtr = util.getCtr(pattern, centerIndex);
+    params.ptnCtr_top = transformPoint(params.ptnCtr.x, params.ptnCtr.y, pattern.transform());
+    console.log({
+        ptnCtr: params.ptnCtr,
+        ptnCtr_top: params.ptnCtr_top,
+    })
+
     console.log({
         center_top: center_top,
         center_in: params.center_in
@@ -35,7 +52,7 @@ const mousedown = function (e) {
 
     // tranform 去掉后的坐标。
 
-    params.m = getSeleted().attr('transform') || defaultTransform;
+    params.m = getSeleted().attr('transform') || ''//defaultTransform;
     params.mObj = getSeleted().transform().matrix;
 
     const p_ = util.getOCoord(scaleGrips[index].cx(), scaleGrips[index].cy(), params.mObj);
@@ -62,15 +79,12 @@ const mousemove = function (e) {
         cy: params.center_in.y,
     }) */
 
-
-
-
     // 计算去掉 transform 后的宽高。
-    const p_ = util.getOCoord(x, y, params.mObj); 
+    const p_ = util.getOCoord(x, y, params.mObj);
     const w = p_.x - params.center_in.x,
           h = p_.y - params.center_in.y;
 
- /*    selected.attr('transform', params.m);
+    selected.attr('transform', params.m);
     selected.transform({
         scaleX: w / params.w,
         scaleY: h / params.h,
@@ -78,11 +92,10 @@ const mousemove = function (e) {
         // cy: selected.bbox().y,
         cx: params.center_in.x,
         cy: params.center_in.y,
-    }, true); */
+    }, true);
 
-    
     // selected.attr('transform', params.m + util.setScale(w / params.w, h / params.h, params.center_in.x, params.center_in.y))
-    util.setScale(selected, params.m, w / params.w, h / params.h, params.center_in.x, params.center_in.y)
+    // util.setScale(selected, params.m, w / params.w, h / params.h, params.center_in.x, params.center_in.y)
 
     // util.dscale(selected, w / params.w, h / params.h, params.center_in.x, params.center_in.y)
     // util.dscale(selected, w / params.w, h / params.h, selected.bbox().x, selected.bbox().y)
@@ -93,8 +106,10 @@ const mouseup = function (e) {
     if (!params.active) return;
     
     params.active = false;
-/*     const selected = getSeleted();
-    selected.attr('transform', params.m);
+
+    
+    // const selected = getSeleted();
+    // selected.attr('transform', params.m);
 
     const x = e.offsetX,
           y = e.offsetY;
@@ -107,7 +122,7 @@ const mouseup = function (e) {
     // 修正 x y 和 width height
     // if 
 
-    let newWidth = selected.width() * scaleX;
+  /*   let newWidth = selected.width() * scaleX;
     let newHeight = selected.height() * scaleY;
     console.log(params.centerIndex)
 
@@ -157,17 +172,59 @@ const mouseup = function (e) {
         newHeight,
     })
 
-    selected.width(newWidth);
-    selected.height(newHeight);
+    // selected.width(newWidth);
+    // selected.height(newHeight);
+
     // selected.move(targetX, targetY);
+    selected.transform({
+        scaleX,
+        scaleY,
+        // cx: params.ptnCtr.x,
+        // cy: params.ptnCtr.y,
+        cx: params.center_in.x,
+        cy: params.center_in.y,
+    }, true) */
+
+    // 控制 pattern 变形
+    pattern.transform({
+        scaleX,
+        scaleY,
+        cx: params.ptnCtr.x,
+        cy: params.ptnCtr.y,
+        // cx: params.center_in.x,
+        // cy: params.center_in.y,
+    }, true)
+
+    // 修正相对位置。
+    
+    /* pattern.transform({
+        x: (params.center_top.x - params.ptnCtr_top.x) * (1 - scaleX), 
+        y: (params.center_top.y - params.ptnCtr_top.y) * (1 - scaleY),
+    }, true) */
+
+    // 只有第一次有效。
+    util.translate(
+        pattern,
+        // (params.center_in.x - params.ptnCtr.x) * (1 - scaleX), 
+        // (params.center_in.y - params.ptnCtr.y) * (1 - scaleY),
+        (params.center_top.x - params.ptnCtr_top.x) * (1 - scaleX), 
+        (params.center_top.y - params.ptnCtr_top.y) * (1 - scaleY)
+    );
 
 
-    showSelectedBox(selected); */
+    // showSelectedBox(selected);
     // scale 的内容要转为 width
-
 } 
 
 const util = {
+
+    translate (el, x, y) {
+        let m = el.transform();
+        var translateM = new SVG.Matrix({ a: 1, b: 0, c: 0, d: 1, e: x, f: y });
+        m = translateM.multiply(m);
+        el.transform(m);
+    },
+
     getIndex(str) {
         const match = /^grip_dir-(\d+)$/.exec(str);
         if (!match) return undefined;
